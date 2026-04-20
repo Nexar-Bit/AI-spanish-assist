@@ -4,18 +4,16 @@ export default function Home() {
   return (
     <div className="space-y-8">
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
-        <h1 className="text-2xl font-bold text-white">Demo para PYMEs en España</h1>
+        <h1 className="text-2xl font-bold text-white">Demo: voz + chatbot</h1>
         <p className="mt-3 max-w-2xl text-slate-400">
-          Este proyecto de muestra incluye un asistente de texto y uno de voz que responden en{" "}
-          <strong className="text-slate-200">español</strong>, persistencia sencilla de contactos y
-          conversaciones (CRM demo), detección de traspaso a humano y un endpoint listo para{" "}
-          <strong className="text-slate-200">Cal.com</strong> cuando configures las variables de
-          entorno.
+          Asistente de <strong className="text-slate-200">texto</strong> y de{" "}
+          <strong className="text-slate-200">voz</strong> en español. El historial vive en el
+          navegador; el servidor no guarda conversaciones ni contactos (sin base de datos ni
+          archivos de estado).
         </p>
         <ul className="mt-4 list-inside list-disc text-slate-400">
-          <li>Canal web simulando WhatsApp / correo (misma API).</li>
-          <li>Voz en el navegador (reconocimiento y síntesis en español de España).</li>
-          <li>Panel del operador para ver conversaciones marcadas para humano.</li>
+          <li>Chat: envías el hilo completo en cada petición para mantener contexto.</li>
+          <li>Voz: reconocimiento y síntesis es-ES en el cliente.</li>
         </ul>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
@@ -33,8 +31,9 @@ export default function Home() {
         </div>
       </div>
       <p className="text-xs text-slate-600">
-        Opcional: define <code className="text-slate-400">OPENAI_API_KEY</code> para respuestas con
-        modelo. Sin clave, el demo usa respuestas heurísticas en español.
+        Opcional: <code className="text-slate-400">OPENAI_API_KEY</code> y, si quieres enlaces de
+        reserva, <code className="text-slate-400">NEXT_PUBLIC_CALCOM_BASE_URL</code> en{" "}
+        <code className="text-slate-400">.env</code>.
       </p>
     </div>
   );

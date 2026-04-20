@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Demo Recepcionista IA — PYME",
-  description: "Chat, voz y traspaso a humano (español)",
+  description: "Chat y voz en español, sin persistencia en servidor",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -22,9 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </Link>
               <Link className="hover:text-white" href="/voz">
                 Voz
-              </Link>
-              <Link className="hover:text-white" href="/operador">
-                Panel operador
               </Link>
             </nav>
           </div>

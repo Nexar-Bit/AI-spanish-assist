@@ -2,15 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Msg = { id: string; role: "user" | "assistant" | "system"; content: string; createdAt: string };
+type Msg = { id: string; role: "user" | "assistant"; content: string };
 
 export default function ChatPage() {
-  const [name, setName] = useState("Cliente demo");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [channel, setChannel] = useState<"web" | "whatsapp" | "email">("whatsapp");
-  const [locale] = useState<"es" | "en">("es");
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,92 +20,54 @@ export default function ChatPage() {
     if (!text || loading) return;
     setInput("");
     setLoading(true);
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversationId: conversationId ?? undefined,
-          channel,
-          locale,
-          contact: { name, email: email || undefined, phone: phone || undefined },
-          message: text,
-        }),
-      });
-      if (!res.ok) throw new Error("request_failed");
-      const data = (await res.json()) as {
-        conversationId: string;
-        messages: Msg[];
-        needsHuman: boolean;
-      };
-      setConversationId(data.conversationId);
-      setMessages(data.messages);
-      setNeedsHuman(data.needsHuman);
-    } catch {
-      setMessages((m) => [
-        ...m,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: "Ha ocurrido un error de red. Inténtalo de nuevo.",
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }, [channel, conversationId, email, input, loading, locale, name, phone]);
+    const userMsg: Msg = { id: crypto.randomUUID(), role: "user", content: text };
+
+    setMessages((prev) => {
+      const thread = [...prev, userMsg];
+      void (async () => {
+        try {
+          const apiMessages = thread.map((m) => ({ role: m.role, content: m.content }));
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ locale: "es", messages: apiMessages }),
+          });
+          if (!res.ok) throw new Error("request_failed");
+          const data = (await res.json()) as { reply: string; needsHuman: boolean };
+          setNeedsHuman(data.needsHuman);
+          setMessages((p) => [
+            ...p,
+            { id: crypto.randomUUID(), role: "assistant", content: data.reply },
+          ]);
+        } catch {
+          setMessages((p) => [
+            ...p,
+            {
+              id: crypto.randomUUID(),
+              role: "assistant",
+              content: "Ha ocurrido un error de red. Inténtalo de nuevo.",
+            },
+          ]);
+        } finally {
+          setLoading(false);
+        }
+      })();
+      return thread;
+    });
+  }, [input, loading]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-      <aside className="space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm">
-        <h2 className="font-semibold text-white">Datos de contacto (CRM demo)</h2>
-        <label className="block text-slate-400">
-          Nombre
-          <input
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </label>
-        <label className="block text-slate-400">
-          Correo (opcional)
-          <input
-            type="email"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <label className="block text-slate-400">
-          Teléfono (opcional)
-          <input
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </label>
-        <label className="block text-slate-400">
-          Canal simulado
-          <select
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100"
-            value={channel}
-            onChange={(e) => setChannel(e.target.value as typeof channel)}
-          >
-            <option value="whatsapp">WhatsApp Business</option>
-            <option value="email">Correo</option>
-            <option value="web">Web</option>
-          </select>
-        </label>
-        {needsHuman && (
-          <p className="rounded-lg bg-amber-950/60 px-2 py-2 text-amber-200">
-            Esta conversación está marcada para seguimiento humano. Revisa el panel operador.
-          </p>
-        )}
-      </aside>
+    <div className="mx-auto max-w-2xl space-y-4">
+      {needsHuman && (
+        <p className="rounded-lg border border-amber-800/60 bg-amber-950/40 px-3 py-2 text-sm text-amber-100">
+          Esta conversación sugiere atención humana (solo indicador en esta sesión; no se guarda en
+          servidor).
+        </p>
+      )}
       <section className="flex min-h-[420px] flex-col rounded-xl border border-slate-800 bg-slate-900/40">
         <div className="border-b border-slate-800 px-4 py-3 text-sm text-slate-400">
-          Asistente en <strong className="text-slate-200">español</strong> · mismo backend que voz
+          Chatbot en <strong className="text-slate-200">español</strong> · historial solo en este
+          navegador
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
           {messages.length === 0 && (

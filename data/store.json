@@ -1,0 +1,61 @@
+{
+  "contacts": [
+    {
+      "id": "c48596d8-d601-45a2-a39e-0a2dd1a4a7d3",
+      "name": "Cliente demo",
+      "createdAt": "2026-04-20T19:06:24.667Z"
+    },
+    {
+      "id": "3f07136b-721a-4c6e-a74e-87cd31aba8c0",
+      "name": "Cliente demo",
+      "createdAt": "2026-04-20T19:06:39.717Z"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "6e9a1430-1e78-43f6-ac26-d69ad63cd695",
+      "channel": "whatsapp",
+      "contactId": "c48596d8-d601-45a2-a39e-0a2dd1a4a7d3",
+      "locale": "es",
+      "needsHuman": false,
+      "messages": [
+        {
+          "id": "1ce5aa51-bde7-44e6-b448-6bc1670b65a9",
+          "role": "user",
+          "content": "hi",
+          "createdAt": "2026-04-20T19:06:24.668Z"
+        },
+        {
+          "id": "b3eb7f11-fc9b-4ecb-8b92-34039726ce35",
+          "role": "assistant",
+          "content": "¡Hola! Soy la recepcionista virtual. ¿En qué puedo ayudarte hoy? Puedo orientarte sobre servicios, horarios o dejar constancia para que un compañero te llame.",
+          "createdAt": "2026-04-20T19:06:24.676Z"
+        }
+      ],
+      "updatedAt": "2026-04-20T19:06:24.676Z"
+    },
+    {
+      "id": "23cf4ce8-1a5c-4696-aece-d96b50d9ba22",
+      "channel": "whatsapp",
+      "contactId": "3f07136b-721a-4c6e-a74e-87cd31aba8c0",
+      "locale": "es",
+      "needsHuman": true,
+      "messages": [
+        {
+          "id": "51d6b55b-720e-4f73-ac29-7e60ff52596e",
+          "role": "user",
+          "content": "I need your help",
+          "createdAt": "2026-04-20T19:06:39.718Z"
+        },
+        {
+          "id": "eeb3ec09-1172-427b-bcfd-0df9b439e53a",
+          "role": "assistant",
+          "content": "Gracias por tu mensaje. Para darte una respuesta precisa, ¿podrías concretar un poco más? Si es urgente o sobre un pedido concreto, puedo pasarte con un agente humano: solo dímelo.",
+          "createdAt": "2026-04-20T19:06:39.725Z"
+        }
+      ],
+      "updatedAt": "2026-04-20T19:06:39.731Z",
+      "handoffReason": "Ofrecido por el asistente / política"
+    }
+  ]
+}

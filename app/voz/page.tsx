@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SpeechRecognitionCtor, SpeechRecognitionLike } from "@/lib/speech-types";
 
-type Msg = { id: string; role: "user" | "assistant" | "system"; content: string; createdAt: string };
+type Msg = { id: string; role: "user" | "assistant"; content: string };
 
 export default function VozPage() {
-  const [name] = useState("Cliente voz");
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [listening, setListening] = useState(false);
   const [lastHeard, setLastHeard] = useState("");
@@ -41,29 +39,35 @@ export default function VozPage() {
   }, []);
 
   const sendText = useCallback(
-    async (text: string) => {
+    (text: string) => {
       setError(null);
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversationId: conversationId ?? undefined,
-          channel: "web",
-          locale: "es",
-          contact: { name },
-          message: text,
-        }),
+      const userMsg: Msg = { id: crypto.randomUUID(), role: "user", content: text };
+      setMessages((prev) => {
+        const thread = [...prev, userMsg];
+        void (async () => {
+          try {
+            const apiMessages = thread.map((m) => ({ role: m.role, content: m.content }));
+            const res = await fetch("/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ locale: "es", messages: apiMessages }),
+            });
+            if (!res.ok) throw new Error("request_failed");
+            const data = (await res.json()) as { reply: string };
+            setMessages((p) => [
+              ...p,
+              { id: crypto.randomUUID(), role: "assistant", content: data.reply },
+            ]);
+            speak(data.reply);
+          } catch {
+            setError("No se pudo contactar con el servidor.");
+            setMessages((p) => p.slice(0, -1));
+          }
+        })();
+        return thread;
       });
-      if (!res.ok) {
-        setError("No se pudo contactar con el servidor.");
-        return;
-      }
-      const data = (await res.json()) as { conversationId: string; messages: Msg[]; reply: string };
-      setConversationId(data.conversationId);
-      setMessages(data.messages);
-      speak(data.reply);
     },
-    [conversationId, name, speak]
+    [speak]
   );
 
   const toggleListen = useCallback(() => {
@@ -91,7 +95,7 @@ export default function VozPage() {
       }
       if (finalText.trim()) {
         setLastHeard(finalText.trim());
-        void sendText(finalText.trim());
+        sendText(finalText.trim());
       }
     };
     rec.onerror = () => {
@@ -109,8 +113,8 @@ export default function VozPage() {
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
         <h1 className="text-xl font-semibold text-white">Agente de voz (demo)</h1>
         <p className="mt-2 text-sm text-slate-400">
-          Pulsa el micrófono y habla en español. La transcripción se envía al mismo API que el chat;
-          la respuesta se lee en voz alta (es-ES).
+          Pulsa el micrófono y habla en español. El historial de la conversación se mantiene en esta
+          pestaña; cada respuesta usa el mismo API que el chat.
         </p>
         {supported === false && (
           <p className="mt-3 text-sm text-red-300">Este navegador no expone Web Speech API.</p>
