@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0f1419;
+  --card: #1a222d;
+  --accent: #3b82f6;
+  --accent2: #22c55e;
+  --muted: #94a3b8;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+}
